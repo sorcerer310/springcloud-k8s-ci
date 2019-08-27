@@ -11,9 +11,9 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 为想在单机上构建微服务集群系统的开发者提供一个可用环境
 
 ## 步骤
-一. vagrant搭建集群主机
-二. 在gl1上安装GitLab,用于代码托管和CI/CD
-三. 在另外三台主机上配置docker、kubernetes环境及安装其他一些必要软件，模拟集群3台主机
+一. vagrant搭建集群主机  
+二. 在gl1上安装GitLab,用于代码托管和CI/CD  
+三. 在另外三台主机上配置docker、kubernetes环境及安装其他一些必要软件，模拟集群3台主机  
 四. 编写项目springboot项目
 
 ## 详细内容
@@ -32,8 +32,9 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 4.下载Vagrant Boxes:  
 >Vagrant Boxes是Vagrant的基础镜像。$ vagrant box add centos/7 可下载centos7的镜像。如果下载速度过慢，可从命令行中把下载地址copy到浏览器中,下载的镜像文件放到~/works/vagrant/路径。  
 
-5.编辑Vagrantfile集群配置文件:  
->$ vim ~/works/vagrant/Vagrantfile
+5.编辑Vagrantfile集群配置文件,并创建虚拟机使用的共享目录:  
+>$ vim mkdir ~/works/vagrant/share  
+$ vim ~/works/vagrant/Vagrantfile
 ```shell
 Vagrant.configure("2") do |config|
 	(1..3).each do |i|
@@ -65,3 +66,13 @@ Vagrant.configure("2") do |config|
 	end
 end
 ```
+
+6.创建虚拟机:
+>$ vagrant up
+
+7.虚拟机常用的一些命令:
+>vagrant up:			启动所有虚拟机  
+>vagrant up node1 node3:	启动名称为node1、node3多个虚拟机  
+>vagrant halt:			关闭虚拟机
+>vagrant destroy:		删除虚拟机  
+>vagrant ssh-config:		查看虚拟机的ssh配置
