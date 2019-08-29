@@ -34,7 +34,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 5.编辑Vagrantfile集群配置文件,并创建虚拟机使用的共享目录:  
 >$ vim mkdir ~/works/vagrant/share  
-将项目中的Vagrantfile文件copy到~/works/vagrant/目录下
+将项目中的vagrant/Vagrantfile文件copy到 ~/works/vagrant/目录下。Vagrantfile是ruby编写的配置文件，其中包括了创建4个CentOS7的虚拟机、关闭每个虚拟机的防火墙、为虚拟机安装docker的一些操作。
 
 6.创建虚拟机:
 >$ vagrant up
