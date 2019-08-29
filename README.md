@@ -18,7 +18,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 ## 详细内容
 ### Vagrant搭建集群主机
-使用Vagrant搭建4个CentOS7的虚拟机模拟集群主机，4台主机名称分别为:gl1,node1,node2,node3
+使用Vagrant搭建4个CentOS7的虚拟机模拟集群主机，4台主机名称分别为:node1,node2,node3,gl
 
 1.创建本机工作目录:  
 >$ mkdir ~/works/vagrant/
@@ -34,38 +34,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 5.编辑Vagrantfile集群配置文件,并创建虚拟机使用的共享目录:  
 >$ vim mkdir ~/works/vagrant/share  
-$ vim ~/works/vagrant/Vagrantfile
-```shell
-Vagrant.configure("2") do |config|
-	(1..3).each do |i|
-		config.vm.define "node#{i}" do |node|
-		# 设置虚拟机的Box
-		node.vm.box = "./virtualbox.box"
-		# 设置虚拟机的主机名
-		node.vm.hostname="node#{i}"
-		# 设置虚拟机的IP
-		node.vm.network "private_network", ip: "192.168.59.#{i}"
-		# 设置主机与虚拟机的共享目录
-		node.vm.synced_folder "~/works/vagrant/share", "/home/vagrant/share"
-		# VirtaulBox相关配置
-		node.vm.provider "virtualbox" do |v|
-			# 设置虚拟机的名称
-			v.name = "node#{i}"
-			# 设置虚拟机的内存大小  
-			v.memory = 2048
-			# 设置虚拟机的CPU个数
-			v.cpus = 1
-		end
-		# 使用shell脚本进行软件安装和配置
-		node.vm.provision "shell", inline: <<-SHELL
-			# 安装docker 1.11.0
-			wget -qO- https://get.docker.com/ | sed 's/docker-engine/docker-engine=1.11.0-0~trusty/' | sh
-			usermod -aG docker vagrant
-		SHELL
-		end
-	end
-end
-```
+将项目中的Vagrantfile文件copy到~/works/vagrant/目录下
 
 6.创建虚拟机:
 >$ vagrant up
@@ -76,3 +45,5 @@ end
 >vagrant halt:			关闭虚拟机
 >vagrant destroy:		删除虚拟机  
 >vagrant ssh-config:		查看虚拟机的ssh配置
+
+### 在gl1上安装GitLab
