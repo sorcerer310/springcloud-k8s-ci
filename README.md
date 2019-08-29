@@ -18,7 +18,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 ## 详细内容
 ### Vagrant搭建集群主机
-使用Vagrant搭建4个CentOS7的虚拟机模拟集群主机，4台主机名称分别为:node1,node2,node3,gl
+使用Vagrant搭建4个CentOS7的虚拟机模拟集群主机，4台主机名称分别为:node1、node2、node3、node4，其中node4用来安装gitlab实现代码托管、CI/CD
 
 1.创建本机工作目录:  
 >$ mkdir ~/works/vagrant/
@@ -46,4 +46,4 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 >vagrant destroy:		删除虚拟机  
 >vagrant ssh-config:		查看虚拟机的ssh配置
 
-### 在gl1上安装GitLab
+### 在node4上安装GitLab
