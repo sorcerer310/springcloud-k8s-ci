@@ -53,7 +53,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 另外Registry要求使用https通信，我们在内部使用可以配置为使用http即可。
 
->$ vim /etc/docker/daemon.json
->{
->   "insecure-registries" : ["192.168.56.104:5000"]
+>$ vim /etc/docker/daemon.json  
+>{  
+>   "insecure-registries" : ["192.168.56.104:5000"]  
 >}
