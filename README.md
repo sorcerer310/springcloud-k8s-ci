@@ -51,7 +51,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 我们执行ip addr命令查询到node4的ip地址为192.168.56.104,可执行以下命令来安装并运行Docker Registry
 >$ docker run -d -p 192.168.56.104:5000:5000 --restart=always --name registry -v /mnt/registry:/var/lib/registry registry:latest
 
-另外Registry要求使用https通信，我们在内部使用可以配置为使用http即可。
+另外Registry要求使用https通信，我们在内部使用可以配置为使用http即可。编辑以下文件将我们的docker仓库认证为信任仓库。
 
 >$ vim /etc/docker/daemon.json  
 >{  
