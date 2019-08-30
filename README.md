@@ -56,4 +56,10 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 >$ vim /etc/docker/daemon.json  
 >{  
 >   "insecure-registries" : ["192.168.56.104:5000"]  
->}
+>}  
+
+接下来我们可以用busybox来实验一下  
+>$ docker pull busybox                                              #拉一个busybox做实验  
+>$ docker tag busybox:latest 192.168.56.104:5000/busybox:v1.0       #本地打标签一个自己的busybox镜像  
+>$ docker push 192.168.56.104:5000/busybox:v1.0                     #将镜像push到本地私有仓库中
+>$ curl -XGET http://192.168.56.104:5000/v2/_catalog                #查看私有仓库中已push的镜像  
