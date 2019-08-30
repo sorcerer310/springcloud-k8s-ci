@@ -12,7 +12,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 ## 步骤
 一. vagrant搭建集群主机  
-二. 在node4上安装本地Docker镜像库和GitLab
+二. 在node4上安装本地Docker镜像库和GitLab  
 三. 在另外三台主机上配置docker、kubernetes环境及安装其他一些必要软件，模拟集群3台主机  
 四. 编写项目springboot项目
 
