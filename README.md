@@ -12,13 +12,13 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 ## 步骤
 一. vagrant搭建集群主机  
-二. 在gl1上安装GitLab,用于代码托管和CI/CD  
+二. 在node4上安装本地Docker镜像库和GitLab  
 三. 在另外三台主机上配置docker、kubernetes环境及安装其他一些必要软件，模拟集群3台主机  
 四. 编写项目springboot项目
 
 ## 详细内容
 ### Vagrant搭建集群主机
-使用Vagrant搭建4个CentOS7的虚拟机模拟集群主机，4台主机名称分别为:node1,node2,node3,gl
+使用Vagrant搭建4个CentOS7的虚拟机模拟集群主机，4台主机名称分别为:node1、node2、node3、node4，其中node4用来安装gitlab实现代码托管、CI/CD
 
 1.创建本机工作目录:  
 >$ mkdir ~/works/vagrant/
@@ -34,7 +34,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 5.编辑Vagrantfile集群配置文件,并创建虚拟机使用的共享目录:  
 >$ vim mkdir ~/works/vagrant/share  
-将项目中的Vagrantfile文件copy到~/works/vagrant/目录下
+将项目中的vagrant/Vagrantfile文件copy到 ~/works/vagrant/目录下。Vagrantfile是ruby编写的配置文件，其中包括了创建4个CentOS7的虚拟机、关闭每个虚拟机的防火墙、为虚拟机安装docker的一些操作。
 
 6.创建虚拟机:
 >$ vagrant up
@@ -46,4 +46,20 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 >vagrant destroy:		删除虚拟机  
 >vagrant ssh-config:		查看虚拟机的ssh配置
 
-### 在gl1上安装GitLab
+### 在node4上安装本地Docker镜像库 Docker Registry
+本地的Docker镜像库用来保存项目打包出来的镜像文件。具体详情可参考Docker Registry的官方文档:：https://docs.docker.com/registry/
+我们执行ip addr命令查询到node4的ip地址为192.168.56.104,可执行以下命令来安装并运行Docker Registry
+>$ docker run -d -p 192.168.56.104:5000:5000 --restart=always --name registry -v /mnt/registry:/var/lib/registry registry:latest
+
+另外Registry要求使用https通信，我们在内部使用可以配置为使用http即可。编辑以下文件将我们的docker仓库认证为信任仓库。
+
+>$ vim /etc/docker/daemon.json  
+>{  
+>   "insecure-registries" : ["192.168.56.104:5000"]  
+>}  
+
+接下来我们可以用busybox来实验一下  
+>$ docker pull busybox                                              #拉一个busybox做实验  
+>$ docker tag busybox:latest 192.168.56.104:5000/busybox:v1.0       #本地打标签一个自己的busybox镜像  
+>$ docker push 192.168.56.104:5000/busybox:v1.0                     #将镜像push到本地私有仓库中  
+>$ curl -XGET http://192.168.56.104:5000/v2/_catalog                #查看私有仓库中已push的镜像  
