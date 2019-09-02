@@ -68,6 +68,6 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 1.首先拉取gitlab ce镜像到本地  
 >$ docker pull gitlab/gitlab-ce  
 2.到home目录下执行以下命令，创建共享本地的卷  
->$ mkdir -vp gitlab/{data,logs,config}
-3.执行以下命令启动gitlab,其中192.168.56.104是当前node4的ip，--volume参数后的路径要对应刚刚创建的gitlab目录
+>$ mkdir -vp gitlab/{data,logs,config}  
+3.执行以下命令启动gitlab,其中192.168.56.104是当前node4的ip，--volume参数后的路径要对应刚刚创建的gitlab目录  
 >$ docker run --detach --hostname 192.168.56.104 --publish 192.168.56.104:443:443 --publish 192.168.56.104:80:80 --publish 192.168.56.104:1022:22 --name gitlab --restart always --volume /home/gitlab/config:/etc/gitlab --volume /home/gitlab/logs:/var/log/gitlab --volume /home/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest
