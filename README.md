@@ -63,3 +63,36 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 >$ docker tag busybox:latest 192.168.56.104:5000/busybox:v1.0       #本地打标签一个自己的busybox镜像  
 >$ docker push 192.168.56.104:5000/busybox:v1.0                     #将镜像push到本地私有仓库中  
 >$ curl -XGET http://192.168.56.104:5000/v2/_catalog                #查看私有仓库中已push的镜像  
+
+### 在node4上安装gitlab 用来托管代码与CI/CD  
+1.首先拉取gitlab ce镜像到本地  
+>$ docker pull gitlab/gitlab-ce  
+
+2.到home目录下执行以下命令，创建共享本地的卷  
+>$ mkdir -vp gitlab/{data,logs,config}  
+
+3.执行以下命令启动gitlab,其中192.168.56.104是当前node4的ip，--volume参数后的路径要对应刚刚创建的gitlab目录  
+>$ docker run --detach --hostname 192.168.56.104 --publish 192.168.56.104:443:443 --publish 192.168.56.104:80:80 --publish 192.168.56.104:1022:22 --name gitlab --restart always --volume /home/gitlab/config:/etc/gitlab --volume /home/gitlab/logs:/var/log/gitlab --volume /home/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest  
+
+4.安装GitLab-Runner。GitLab-Runner是配合Git-Lab-CI一起使用，用来执行CI的自动化脚本。
+
+(1)我们参考GitLab官方文档，先添加GitLab官方库，然后使用yum安装  
+>$ curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh | sudo bash  
+>$ yum -y install gitlab-runner  
+
+(2)向GitLab注册GitLab-Runner,执行命令后会要求输入一系列参数，我们根据当前环境可做如下填写,其中gitlab-ci token是我们访问http://192.168.56.104 页面->管理中心->概览->Runner中获得的。
+>$ gitlab-runner register  
+Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/):  
+http://192.168.56.104  
+Please enter the gitlab-ci token for this runner:  
+xxx-xxxxxxxxxxxxxxx  
+Please enter the gitlab-ci description for this runner:  
+(此处填入你对该runner的描述)  
+Please enter the gitlab-ci tags for this runner (comma separated):  
+shared-runner  
+Please enter the executor: docker-ssh, parallels, ssh, docker+machine, kubernetes, docker, shell, virtualbox, docker-ssh+machine, custom:  
+docker  
+Please enter the default Docker image (e.g. ruby:2.6):  
+192.168.56.104:5000/ali-maven-docker:3.5.4-jdk-8-alpine  
+
+(3)再次访问GitLab的管理界面Runner模块，我们就能看到注册成功的runner了。
