@@ -100,3 +100,85 @@ Please enter the default Docker image (e.g. ruby:2.6):
 192.168.56.104:5000/ali-maven-docker:3.5.4-jdk-8-alpine  
 
 (3)再次访问GitLab的管理界面Runner模块，我们就能看到注册成功的runner了。
+
+### 编写项目springboot项目  
+1. 创建一个maven项目，父项目pom文件见[springcloud-k8s-ci-demo/pom.xml](https://github.com/sorcerer310/springcloud-k8s-ci/blob/master/springcloud-k8s-ci-demo/pom.xml)  
+2. 在父项目下创建若干maven子项目eureka、zuul、oauth、order、storage等子项目，每个子项目的pom文件，[子项目目录](https://github.com/sorcerer310/springcloud-k8s-ci/tree/master/springcloud-k8s-ci-demo)  
+3. 我们以storage项目为例，先配置好一个可以运行的springboot程序  
+在pom.xml中引(1)入必要的库。(2)启用maven插件。(3)增加maven打包docker的插件。(4)配置插件的相关信息。
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>demo</artifactId>
+        <groupId>com.bsu.skc</groupId>
+        <version>1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>storage</artifactId>
+    <dependencies>
+        <!--(1)eureka客户端，用于与eurekaka服务端通信-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!--(1)自动管理cloud包对springboot依赖版本号-->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Greenwich.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!--docker相关-->
+    <properties>
+        <docker.image.prefix>springboot</docker.image.prefix>
+    </properties>
+    <build>
+        <plugins>
+            <!--(2)启用maven插件-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!--(3)maven打包docker的插件-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <!--(4)打包好镜像的名称-->
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <!--(4)docker使用的目录-->
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <resources>
+                        <!--(4)要打包进镜像的资源-->
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                    <!--(4)registry私有库的地址及端口-->
+                    <registryUrl>http://192.168.56.104:5000</registryUrl>
+                    <pushImage>true</pushImage>
+                    <!--(4)push到私有库镜像的名称-->
+                    <imageName>${project.artifactId}:${project.version}</imageName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```  
+4. 为storage项目增加入口类StorageApplication，写好入口函数。再增加一个RestController类，定义好用来在浏览器中测试数据接口。[Storage.java](https://github.com/sorcerer310/springcloud-k8s-ci/blob/master/springcloud-k8s-ci-demo/storage/src/main/java/com/bsu/skc/api/Storage.java)
+5. 接下来我们在IDEA中Maven Project窗口中依次执行install、docker:build、docker:push命令测试程序是否能被正常打包、生成镜像、推送到registry。测试正常后，以后我们在本地开发只需直接运行程序测试程序是否能正常运行，不需要执行docker:build、docker:push两条命令了，这两条命令会在GitLab-ci中执行对程序进行生成镜像、推送至registry。
