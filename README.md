@@ -17,7 +17,8 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 
 ~~四. 在另外三台主机上配置docker、kubernetes环境及安装其他一些必要软件，模拟集群3台主机~~
 
-五. 编写项目springboot项目
+五. 编写项目springboot项目  
+六. 编写GitLab-ci脚本  
 
 ## 详细内容
 ### Vagrant搭建集群主机
@@ -181,4 +182,6 @@ Please enter the default Docker image (e.g. ruby:2.6):
 </project>
 ```  
 4. 为storage项目增加入口类StorageApplication，写好入口函数。再增加一个RestController类，定义好用来在浏览器中测试数据接口。[Storage.java](https://github.com/sorcerer310/springcloud-k8s-ci/blob/master/springcloud-k8s-ci-demo/storage/src/main/java/com/bsu/skc/api/Storage.java)
-5. 接下来我们在IDEA中Maven Project窗口中依次执行install、docker:build、docker:push命令测试程序是否能被正常打包、生成镜像、推送到registry。测试正常后，以后我们在本地开发只需直接运行程序测试程序是否能正常运行，不需要执行docker:build、docker:push两条命令了，这两条命令会在GitLab-ci中执行对程序进行生成镜像、推送至registry。
+5. 接下来我们在IDEA中Maven Project窗口中依次执行install、docker:build、docker:push命令测试程序是否能被正常打包、生成镜像、推送到registry。测试正常后，以后我们在本地开发只需直接运行程序测试程序是否能正常运行，不需要执行docker:build、docker:push两条命令了，这两条命令会在GitLab-ci中执行对程序进行生成镜像、推送至registry。  
+### 编写GitLab脚本
+
