@@ -1,0 +1,57 @@
+#image: openjdk:8-jdk-alpine,maven:3-jdk-8
+#image: maven:3.6.2-jdk-8
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
+  DOCKER_DRIVER: overlay2
+  PROJECT_NAME: $CI_PROJECT_NAME
+  PROJECT_VERSION: "0.0.1"
+
+#cache:
+#  paths:
+#  - .m2/
+#
+stages:
+  - build
+  - deploy
+
+maven-build-job:
+  stage: build
+  script:
+    - cd storage
+    - mvn install
+    - mvn docker:build
+    - mvn docker:push
+
+#maven-deploy-job:
+#  stage: deploy
+#  script:
+
+
+
+
+#variables:
+#  MAVEN_OPTS: "-Dmaven.repo.local=/root/.m2/repository"
+#  DOCKER_DRIVER: overlay2
+#  PROJECT_NAME: $CI_PROJECT_NAME
+#  PROJECT_VERSION: "0.0.1"
+#
+#stages:
+#  - build
+#  - deploy
+#
+#maven-build:
+#  stage: build
+#  script:
+#    - mvn package -B -DskipTests
+#    - mv target/$CI_PROJECT_NAME*.jar target/app.jar
+#    - docker build -t $DOCKER_HUB_REPO:$PROJECT_NAME-$PROJECT_VERSION .
+#    - docker push $DOCKER_HUB_REPO:$PROJECT_NAME-$PROJECT_VERSION
+#  artifacts:
+#    paths:
+#      - ./*.yaml
+#
+#maven-deploy:
+#  stage: deploy
+#  script:
+#    - mvn docker:push

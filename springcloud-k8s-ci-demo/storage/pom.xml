@@ -11,8 +11,62 @@
 
     <artifactId>storage</artifactId>
     <dependencies>
-
+        <!--eureka客户端，用于与eurekaka服务端通信-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
     </dependencies>
 
+    <!--自动管理cloud包对springboot依赖版本号-->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Greenwich.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
+    <!--docker相关-->
+    <properties>
+        <docker.image.prefix>springboot</docker.image.prefix>
+    </properties>
+    <build>
+        <plugins>
+            <!--启用maven插件-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!--maven打包docker的插件-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <!--打包好镜像的名称-->
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <!--docker使用的目录-->
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <resources>
+                        <!--要打包进镜像的资源-->
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                    <!--registry私有库的地址及端口-->
+                    <registryUrl>http://192.168.56.104:5000</registryUrl>
+                    <pushImage>true</pushImage>
+                    <!--push到私有库镜像的名称-->
+                    <imageName>192.168.56.104:5000/${project.artifactId}:${project.version}</imageName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

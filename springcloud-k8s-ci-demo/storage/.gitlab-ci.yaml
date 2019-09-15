@@ -1,0 +1,14 @@
+stages:
+  - build
+#  - deploy
+
+maven-build-job:
+  stage: build
+  script:
+    - mvn install
+    - mvn docker:build
+    - mvn docker push
+
+#maven-deploy-job:
+#  stage: deploy
+#  script:
