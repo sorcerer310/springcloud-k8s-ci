@@ -79,7 +79,7 @@ vmware+vagrant  用vmware+vagrant模拟集群环境
 3.执行以下命令启动gitlab,其中192.168.56.104是当前node4的ip，--volume参数后的路径要对应刚刚创建的gitlab目录  
 >$ docker run --detach --hostname 192.168.56.104 --publish 192.168.56.104:443:443 --publish 192.168.56.104:80:80 --publish 192.168.56.104:1022:22 --name gitlab --restart always --volume /home/gitlab/config:/etc/gitlab --volume /home/gitlab/logs:/var/log/gitlab --volume /home/gitlab/data:/var/opt/gitlab gitlab/gitlab-ce:latest  
 
-4.安装GitLab-Runner。GitLab-Runner是配合Git-Lab-CI一起使用，用来执行CI的自动化脚本。
+4.安装GitLab-Runner。GitLab-Runner是配合GitLab-CI一起使用，用来执行CI的自动化脚本。
 
 (1)我们参考GitLab官方文档，先添加GitLab官方库，然后使用yum安装  
 >$ curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.rpm.sh | sudo bash  
@@ -100,7 +100,38 @@ docker
 Please enter the default Docker image (e.g. ruby:2.6):  
 192.168.56.104:5000/ali-maven-docker:3.5.4-jdk-8-alpine  
 
-(3)再次访问GitLab的管理界面Runner模块，我们就能看到注册成功的runner了。
+(3)再次访问GitLab的管理界面Runner模块，我们就能看到注册成功的runner了。  
+
+(4)非常重要的一步来了。由于我们在编写GitLab-ci脚本[.gitlab-ci.yml](https://github.com/sorcerer310/springcloud-k8s-ci/blob/master/springcloud-k8s-ci-demo/.gitlab-ci.yml)时，会在stage中执行docker命令，这条命令需要在gitlab的docker容器中执行，但容器中并没有安装docker。虽然我们可以通过在容器中再继续安装docker的方式(docker-in-docker)来执行，但这会引起其他的一些问题，所以我们要在这里采用socket binding方式来执行，详细见[浅析 docker-in-docker 和 socket-binding](https://qqzeng.top/2019/07/07/%E6%B5%85%E6%9E%90-docker-in-docker-%E5%92%8C-socket-binding/)这篇文章，这篇文章详细的讲述了如何在容器中执行命令，以及分析了几种方式的优缺点。  
+要启用socket binding方式我们需要修改宿主机gitlab-runner的配置文件/etc/gitlab-runner/config.toml，需要为容器绑定宿主机的docker.sock，并绑定宿主机的maven缓存目录:  
+~~~toml
+concurrent = 1
+check_interval = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "springboot-k8s-gitlab-ci"
+  url = "http://192.168.56.104"
+  token = "bE76Z58Zc4As5M1cyXHz"
+  executor = "docker"
+  [runners.custom_build_dir]
+  [runners.docker]
+    tls_verify = false
+    image = "192.168.56.104:5000/ali-maven-docker:3.5.4-jdk-8-alpine"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock","/cache","/root/.m2:/root/.m2"]
+    shm_size = 0
+    pull_policy="if-not-present"
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+~~~  
+要修改有volumes字段和pull_policy字段
 
 ### 编写项目springboot项目  
 1. 创建一个maven项目，父项目pom文件见[springcloud-k8s-ci-demo/pom.xml](https://github.com/sorcerer310/springcloud-k8s-ci/blob/master/springcloud-k8s-ci-demo/pom.xml)  
